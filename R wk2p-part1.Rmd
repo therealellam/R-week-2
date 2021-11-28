@@ -1,0 +1,345 @@
+---
+title: "DETERMINING AD CLICKABILITY USING R"
+output: html_document
+---
+
+## DEFINING THE QUESTION
+
+A Kenyan entrepreneur has created an online cryptography course and would want to advertise it on her blog. She currently targets audiences originating from various countries. In the past, she ran ads to advertise a related course on the same blog and collected data in the process. She would now like to employ your services as a Data Science Consultant to help her identify which individuals are most likely to click on her ads.
+
+## THE METRICS FOR SUCCESS
+
+Identify which individuals are most likely to click on the client's ads.
+
+## THE CONTEXT
+
+The client is A Kenyan entrepreneur that has created an online cryptography course and would want to advertise it on her blog. She currently targets audiences originating from various countries. In the past, she ran ads to advertise a related course on the same blog and collected data in the process.
+
+## APPROPRIATENESS OF THE AVAILABLE DATA
+
+The data set provided shows the daily time one spent on site, daily internet usage, Ad topic line, timestamp and whether a user clicked on the Ad all of which will be relevant in this project
+
+## We first call the data.table library to be able to work with tabular data
+
+```{r}
+library("data.table")
+
+advert_dataset <- fread('http://bit.ly/IPAdvertisingData')
+
+# First check have a look at the data set.
+
+head(advert_dataset)
+```
+
+## We then check for the total number of missing values in each of the coulmns in our dataset using the colSums function
+
+```{r}
+colSums(is.na(advert_dataset))
+```
+```{r}
+
+```
+
+## Checking total number of missing values in the dataframe
+
+```{r}
+sum(is.na(advert_dataset))
+```
+
+## Identifying the numeric class in the data and evaluating if there are any outliers
+
+```{r}
+str(advert_dataset)
+```
+## Checking for outlier values per each Categorical column
+
+```{r}
+boxplot.stats(advert_dataset$Age)$out
+boxplot.stats(advert_dataset$Male)$out
+boxplot.stats(advert_dataset$ 'Clicked on Ad')$out
+```
+##Boxplots for each categorical column
+
+```{r}
+boxplot(advert_dataset$Age, main="Age", boxwex=0.1)
+
+boxplot(advert_dataset$'Clicked on Ad', main="Clicked on Ad", boxwex=0.1)
+```
+
+## Checking for outliers on continous variables
+
+```{r}
+boxplot.stats(advert_dataset$'Daily Time Spent on Site')$out
+boxplot.stats(advert_dataset$'Area Income')$out
+boxplot.stats(advert_dataset$ 'Daily Internet Usage')$out
+```
+## Boxplots for continuos variables
+
+```{r}
+boxplot(x=advert_dataset$'Daily Time Spent on Site', main="Daily Time Spent on Site", boxwex=0.1)
+boxplot(x=advert_dataset$'Area Income', main="Area Income", boxwex=0.1)
+boxplot(x=advert_dataset$'Daily Internet Usage', main="Daily Internet Usage", boxwex=0.1)
+```
+##Checking for Duplicates
+
+```{r}
+dup_rows <- df[duplicated(advert_dataset),]
+dup_rows  #The data frame has no duplicated rows
+```
+##UNIVARIATE ANALYSIS
+
+1. Measures of Central Tendency
+
+#Mean
+```{r}
+#Average time spent on a site
+print(paste("The average time spent on a site is",mean(advert_dataset$`Daily Time Spent on Site`)))
+
+#Average Age of users
+print(paste("The Average age of users is ",mean(advert_dataset$Age)))
+
+#Average Area income
+print(paste("The Average Area income is",mean(advert_dataset$`Area Income`)))
+
+#Average Daily internet Usage
+print(paste("The Average daily internet usage is",mean(advert_dataset$`Daily Internet Usage`)))
+```
+#Median
+```{r}
+
+#Median time spent on a site
+print(paste("The median time spent on a site is",median(advert_dataset$`Daily Time Spent on Site`)))
+
+#Median Age of users
+print(paste("The median age of users is ",median(advert_dataset$Age)))
+
+#Median Area income
+print(paste("The median Area income is",median(advert_dataset$`Area Income`)))
+
+#Median Daily internet Usage
+print(paste("The median daily internet usage is",median(advert_dataset$`Daily Internet Usage`)))
+```
+#Mode
+```{r}
+
+getmode <- function(v) {
+   uniqv <- unique(v)
+   uniqv[which.max(tabulate(match(v, uniqv)))]
+}
+#Mode time spent on a site
+print(paste("The mode time spent on a site is",getmode(advert_dataset$`Daily Time Spent on Site`)))
+
+#Mode Age of users
+print(paste("The mode age of users is ",getmode(advert_dataset$Age)))
+
+#Mode Area income
+print(paste("The mode Area income is",getmode(advert_dataset$`Area Income`)))
+
+#Mode Daily internet Usage
+print(paste("The mode daily internet usage is",getmode(advert_dataset$`Daily Internet Usage`)))
+```
+2. Measures of Dispersion
+
+#Min
+```{r}
+#Min time spent on a site
+print(paste("The minimum time spent on a site is",min(advert_dataset$`Daily Time Spent on Site`)))
+
+#Min Age of users
+print(paste("The minimum age of users is ",min(advert_dataset$Age)))
+
+#Min Area income
+print(paste("The minimum Area income is",min(advert_dataset$`Area Income`)))
+
+#Min Daily internet Usage
+print(paste("The minimum daily internet usage is",min(advert_dataset$`Daily Internet Usage`)))
+```
+#Max
+```{r}
+#Max time spent on a site
+print(paste("The maximum time spent on a site is",max(advert_dataset$`Daily Time Spent on Site`)))
+
+#Max Age of users
+print(paste("The maximum age of users is ",max(advert_dataset$Age)))
+
+#Max Area income
+print(paste("The maximum Area income is",max(advert_dataset$`Area Income`)))
+
+#Max Daily internet Usage
+print(paste("The maximum daily internet usage is",max(advert_dataset$`Daily Internet Usage`)))
+```
+#Range
+```{r}
+#Range of time spent on a site
+range(advert_dataset$`Daily Time Spent on Site`)
+
+#Range of Age of users
+range(advert_dataset$Age)
+
+#Range of Area income
+range(advert_dataset$`Area Income`)
+
+#range of Daily internet Usage
+range(advert_dataset$`Daily Internet Usage`)
+```
+#Quantile
+```{r}
+#Quantiles of time spent on a site
+quantile(advert_dataset$`Daily Time Spent on Site`)
+
+#Quantiles of Age of users
+quantile(advert_dataset$Age)
+
+#Quantiles of Area income
+quantile(advert_dataset$`Area Income`)
+
+#Quantiles of Daily internet Usage
+quantile(advert_dataset$`Daily Internet Usage`)
+```
+#Variance
+```{r}
+#Var time spent on a site
+print(paste("The variance of time spent on a site is",var(advert_dataset$`Daily Time Spent on Site`)))
+
+#Var Age of users
+print(paste("The variance of age of users is ",var(advert_dataset$Age)))
+
+#Var Area income
+print(paste("The variance of Area income is",var(advert_dataset$`Area Income`)))
+
+#Var Daily internet Usage
+print(paste("The variance of daily internet usage is",var(advert_dataset$`Daily Internet Usage`)))
+```
+#Standard Deviation
+```{r}
+print(paste("The Std Dev of time spent on a site is",sd(advert_dataset$`Daily Time Spent on Site`)))
+
+#sd Age of users
+print(paste("The Std Dev of age of users is ",sd(advert_dataset$Age)))
+
+#sd Area income
+print(paste("The Std Dev of Area income is",sd(advert_dataset$`Area Income`)))
+
+#sd Daily internet Usage
+print(paste("The Std Dev of daily internet usage is",sd(advert_dataset$`Daily Internet Usage`)))
+```
+3. Univariate Graphing
+
+#Boxplot
+```{r}
+boxplot(advert_dataset$`Daily Time Spent on Site`, main="Daily Time Spent on site")
+boxplot(advert_dataset$`Age`, main="Age Distribution")
+boxplot(advert_dataset$`Area Income`, main="Area income Distribution")
+boxplot(advert_dataset$`Daily Internet Usage`, main="Daily Internet usage distribution")
+```
+#Bar Graph
+```{r}
+barplot(table(advert_dataset$Male), main = "Bar Plot of The Male Column")
+barplot(table(advert_dataset$`Clicked on Ad`), main = "Bar Plot of Clicked on Ad Column")
+barplot(table(advert_dataset$Age), main = "Bar Plot of Age Column")
+
+```
+#Histogram
+```{r}
+hist(advert_dataset$Age, main= "Histogram of Age Of Users")
+```
+## BIVARIATE & MULTIVARIATE ANALYSIS
+
+1. Covariance
+```{r}
+cov(advert_dataset$`Daily Time Spent on Site`, advert_dataset$Age)
+cov(advert_dataset$`Daily Time Spent on Site`, advert_dataset$`Daily Internet Usage`)
+cov(advert_dataset$`Daily Internet Usage`, advert_dataset$Age)
+cov(advert_dataset$`Area Income`, advert_dataset$`Daily Internet Usage`)
+```
+2. Correlation
+```{r}
+cor(advert_dataset$`Daily Time Spent on Site`, advert_dataset$Age)
+cor(advert_dataset$`Daily Time Spent on Site`, advert_dataset$`Daily Internet Usage`)
+cor(advert_dataset$`Daily Internet Usage`, advert_dataset$Age)
+cor(advert_dataset$`Area Income`, advert_dataset$`Daily Internet Usage`)
+```
+3. Bivariate
+```{r}
+plot(advert_dataset$`Daily Time Spent on Site`, advert_dataset$`Daily Internet Usage`, xlab="Daily time spent on Site", ylab="Daily internet usage", main = "Scatter plot of Daily internet usage vs Daily time spent on site")
+```
+##MODELLING
+1. Regression
+
+```{r}
+setnames(advert_dataset, c("Daily Time Spent on Site","Age","Area Income","Daily Internet Usage","Ad Topic Line","City","Male","Country","Timestamp","Clicked on Ad"),c("Daily_Time_Spent_on_Site","Age","Area_Income","Daily_Internet_Usage","Ad_Topic_Line","City","Male","Country","Timestamp","Clicked_on_Ad"))
+```
+
+
+
+```{r}
+# applying the lm() function
+
+multi_lm <- lm(Clicked_on_Ad ~ Daily_Time_Spent_on_Site + Age + Area_Income + Daily_Internet_Usage + Male, advert_dataset)
+```
+
+```{r}
+#generating the anova table
+anova(multi_lm)
+```
+
+2. KNN
+
+```{r}
+#load the data
+head(advert_dataset)
+```
+
+##create a random number equal 90% of total number of rows
+```{r}
+ran <- sample(1:nrow(advert_dataset),0.9 * nrow(advert_dataset))
+```
+
+##creating a normalization function
+```{r}
+nor <-function(x) { (x -min(x))/(max(x)-min(x))   }
+```
+
+##applying the normalization function to our data table
+```{r}
+ad_nor <- as.data.frame(lapply(advert_dataset[,c(1,2,3,4)], nor))
+```
+
+##Extracting the training set
+```{r}
+ad_train <- ad_nor[ran,]
+```
+
+##Extracting the test set
+```{r}
+ad_test <- ad_nor[-ran,]
+```
+
+##the last column of our training set is what we need to predict, we convert it to normal factor
+```{r}
+order(data.table[,"column"])
+ad_target <- as.factor(advert_dataset[ran,10])
+```
+
+##we also convert the last column of test set to normal factor
+```{r}
+test_target <- as.factor(advert_dataset[-ran,10])
+```
+
+##Running the KNN function
+```{r}
+ library(class)
+ pr <- knn(ad_train,ad_test,cl=ad_target,k=20)
+```
+
+##Ceating the confusion Matrix
+```{r}
+tb <- table(pr,test_target)
+```
+
+##Checking model Accuracy
+```{r}
+ accuracy <- function(x){sum(diag(x)/(sum(rowSums(x)))) * 100}
+ accuracy(tb)
+```
+

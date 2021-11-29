@@ -112,6 +112,31 @@ new_data %>% drop_na()
 colSums(is.na(new_data))
 ```
 
+##Using Mice package to better understand missing values
+```{r}
+install.packages("mice")
+library(mice)
+md.pattern(new_data,plot = TRUE,rotate.names = TRUE)
+```
+
+Imputing any missing values using the mice function
+```{r}
+# Assessing the imputation methods for mice
+methods(mice)
+```
+ Imputing using the mice function
+```{r}
+# Using random forest as the imputation method as most of our missing values are discrete
+new_data_full<-mice(new_data,m=5,
+                       method="rf",
+                       maxit = 50,seed = 50)
+```
+
+```{r}
+new_data<- complete(new_data_full,1)
+```
+
+
 ##Univariate Graphic
 ```{r}
 boxplot(new_data$`Administrative`, main="Administrative")
@@ -135,6 +160,44 @@ barplot(table(new_data$ProductRelated), main = "Bar Plot of Product Related visi
 hist(new_data$ BounceRates, main= "Histogram of Bounce Rates")
 ```
 
+```{r}
+# Administrative plots
+density_plot(new_data,1,"Distribution of visitors in Administration page")
+```
+```{r}
+# Informative page distribution
+density_plot(new_data,3,"The Distribution of vistors in informative pages")
+```
+
+```{r}
+# Product page distribution
+density_plot(new_data,5,"Distribution of visitors on Product related pages")
+```
+
+```{r}
+# Distribution of Special days- closeness of a sites visiting time to a special day
+density_plot(new_data,10,"Distribution of Special day proximity")
+```
+#For Discrete variables
+```{r}
+barplot(table(new_data$Month),main="Frequency of visitors per month",col = "blue",ylab = "count of visitors")
+```
+##BIVARIATE ANALYSIS
+
+```{r}
+# Assessign the correlation
+
+library("dplyr") 
+nums<-select_if(new_data,is.numeric)
+
+install.packages("corrplot")
+library(corrplot)
+corrplot(cor(nums),method = "circle",type="upper")
+```
+##Relship on Exit Rate and visits on the Administrative page
+```{r}
+plot(new_data$Administrative,new_data$ExitRates,main="Relship on Exit Rate and visits on the Administrative page",col = "blue",xlab = "Administrative Page visits",ylab = "Exit rates")
+```
 
 ##MODELING
 
@@ -153,9 +216,38 @@ ad_nor <- as.data.frame(lapply(new_data[,c(1,2,3,4,5,6,7,8,9,10,12,13,14,15)], n
 
 ##Applying the K-means clustering algorithm with no. of centroids(k)=3
 ```{r}
-result<- kmeans(na.omit(new_data),3) 
-result$withinss
-result$tot.withinss/km_cluster$betweenss
+result<- kmeans(ad_nor,3,iter.max = 5) 
+
 ```
 
+##Visualizing
+```{r}
+install.packages("cluster")
+library("cluster")
+```
+```{r}
+install.packages("factoextra")
+
+```
+```{r}
+library("factoextra")
+fviz_cluster(result,data=ad_nor)
+```
+##HIERACHICAL MODEL
+```{r}
+?hclust
+```
+
+
+```{r}
+# Getting the distance to be used to locate points
+dist<-dist(ad_nor,method = "euclidian")
+
+```
+```{r}
+# Hierarchical model
+h_model<-hclust(dist,method = "complete")
+# Plotting the dendrogram to visualize the similarity between points
+h_model
+```
 
